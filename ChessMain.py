@@ -1,6 +1,7 @@
 import pygame as p
 import ChessEngine 
 import random
+<<<<<<< HEAD
 #thông tin về bàn cờ
 WIDTH = HEIGHT = 512 # kích thước 
 DIMENSION = 8 # số ô cờ
@@ -8,11 +9,104 @@ SQ_SIZE = HEIGHT // DIMENSION # kích thước các ô cờ
 MAX_FPS = 20 #  tốc độ khung hình khi di chuyển chuột
 IMAGES = {} # 1 dict để lưu các quân cờ
 #Hàm  load các hình ảnh quân cờ
+=======
+
+WIDTH = HEIGHT = 512
+DIMENSION = 8 
+SQ_SIZE = HEIGHT // DIMENSION
+MAX_FPS = 20
+IMAGES = {}
+
+>>>>>>> 595b1e9b0c537e24d442e53e99c8b383bbf65f10
 def loadImages():
     pieces = ['wp','wR','wN','wB','wK', 'wQ','bp','bR','bN','bB','bK','bQ']
     for piece in pieces:
         IMAGES[piece] = p.transform.scale(p.image.load("images/" + piece + ".png"), (SQ_SIZE, SQ_SIZE))
 
+<<<<<<< HEAD
+=======
+""" def main(): 
+    p.init()
+    screen = p.display.set_mode((WIDTH, HEIGHT))
+    clock = p.time.Clock()
+    screen.fill(p.Color("white"))
+    gs = ChessEngine.GameState()
+    validMoves = gs.getValidMoves()
+    moveMade =False
+    animate = False
+    loadImages()
+    running = True
+    sqSelected = ()
+    playerClicks = []
+    gameOver = False
+
+    while running:
+        for e in p.event.get():
+            if e.type == p.QUIT:
+                running = False
+            elif e.type == p.MOUSEBUTTONDOWN:
+                if not gameOver:
+                    location = p.mouse.get_pos()
+                    col = location[0] // SQ_SIZE
+                    row = location[1] // SQ_SIZE
+                    if sqSelected == (row, col):
+                        sqSelected = ()
+                        playerClicks = []
+                    else:
+                        sqSelected = (row, col)
+                        playerClicks.append(sqSelected)
+                    
+                    if len(playerClicks) == 2:
+                        move = ChessEngine.Move(playerClicks[0], playerClicks[1], gs.board)
+                        # Kiểm tra lượt chơi trước khi thực hiện nước đi
+                        for i in range(len(validMoves)):
+                            if move == validMoves[i]:
+                                gs.makeMove(validMoves[i])
+                                moveMade =True
+                                animate = True
+                                sqSelected = ()  # reset lựa chọn
+                                playerClicks = []
+                                print(move.getChessInfo() + " vi tri: " + move.getChessNotation())
+                        if not moveMade: 
+                            playerClicks = [sqSelected]
+
+            elif e.type == p.KEYDOWN:
+                if e.key == p.K_z:  # Nhấn z để undo move
+                    gs.undoMove()
+                    animate = False
+                    moveMade =True
+                if e.key == p.K_r: # nhan r resset game
+                    gs =ChessEngine.GameState()
+                    validMoves = gs.getValidMoves()
+                    sqSelected = ()
+                    playerClicks = []
+                    moveMade = False
+                    animate = False
+
+
+        if moveMade:
+            if animate:
+                animateMove(gs.moveLog[-1], screen, gs.board,clock)
+            validMoves = gs.getValidMoves()
+            moveMade =False
+
+        drawGameState(screen, gs, validMoves, sqSelected)  
+
+        if gs.checkMate:
+            gameOver = True
+            if gs.whiteToMove:
+                drawEndGameText(screen,"Vua Trang Da Bi Chieu")
+            else:
+                drawEndGameText(screen,"Vua Den Da Bi Chieu")
+        if gs.staleMate:
+            gameOver = True
+            drawEndGameText("Hoa")
+
+        clock.tick(MAX_FPS)
+        p.display.flip()
+"""
+
+>>>>>>> 595b1e9b0c537e24d442e53e99c8b383bbf65f10
 def main_menu():
     p.init()
     screen = p.display.set_mode((WIDTH, HEIGHT))
@@ -79,9 +173,18 @@ def start_pvp():
                         for i in range(len(validMoves)):
                             if move == validMoves[i]:
                                 gs.makeMove(validMoves[i])
+<<<<<<< HEAD
                                 if move.isPawnPromotion:
                                     chosenPiece = choosePromotionPiece(screen, move.pieceMoved[0])
                                     gs.board[move.endRow][move.endCol] = chosenPiece
+=======
+
+                                if move.isPawnPromotion:
+                                    chosenPiece = choosePromotionPiece(screen, move.pieceMoved[0])
+                                    gs.board[move.endRow][move.endCol] = chosenPiece
+
+                                    
+>>>>>>> 595b1e9b0c537e24d442e53e99c8b383bbf65f10
                                 moveMade = True
                                 animate = True
                                 sqSelected = ()
@@ -205,6 +308,7 @@ def start_pvai():
         clock.tick(MAX_FPS)
         p.display.flip()
 
+<<<<<<< HEAD
 def findBestMove(gs, validMoves):
     if validMoves:
         return random.choice(validMoves)
@@ -213,6 +317,9 @@ def findBestMove(gs, validMoves):
 
 
 
+=======
+# ------------------------------------------Game--------------------------------------------
+>>>>>>> 595b1e9b0c537e24d442e53e99c8b383bbf65f10
 def highlightMoves(screen, gs, validMoves, sqSelected):
     if sqSelected != ():
         r, c = sqSelected
@@ -309,10 +416,26 @@ def choosePromotionPiece(screen, color):
         
         p.display.flip()
             
+<<<<<<< HEAD
 
+=======
+#------------------------------------------------------------------------------------------------------------
+
+#-------------------------------------------------AI-------------------------------------------------------
+def findBestMove(gs, validMoves):
+    if validMoves:
+        return random.choice(validMoves)
+    return None
+
+#----------------------------------------------------------------------------------------------------------
+>>>>>>> 595b1e9b0c537e24d442e53e99c8b383bbf65f10
 if __name__ == "__main__":
     mode = main_menu()
     if mode == "PvP":
         start_pvp()
     elif mode == "PvAI":
+<<<<<<< HEAD
         start_pvai()
+=======
+        start_pvai()
+>>>>>>> 595b1e9b0c537e24d442e53e99c8b383bbf65f10
