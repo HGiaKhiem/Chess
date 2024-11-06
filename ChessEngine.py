@@ -1,5 +1,6 @@
 <<<<<<< HEAD
 #test git hub
+#test git hub 2 test them phat nua 
 #class   cho game 
 =======
 >>>>>>> 595b1e9b0c537e24d442e53e99c8b383bbf65f10
