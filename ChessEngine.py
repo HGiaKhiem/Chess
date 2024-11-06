@@ -16,8 +16,7 @@ class GameState():
             ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"],
         ]
 <<<<<<< HEAD
-        #TEST them phat nữa
-        #jfaiofjiof
+        #test lần cuối trước khi lam ia
         # các hàm tìm kiếm nước đi của các quân
         # sẽ ánh xạ các kí tự tương ứng với tên  quân cờ và hàm di chuyển
         self.moveFunction = {'p': self.getPawnMoves, 
