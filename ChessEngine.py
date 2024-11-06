@@ -1,3 +1,4 @@
+#test git hub
 #class   cho game 
 class GameState():
     def __init__(self):
@@ -12,6 +13,7 @@ class GameState():
             ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"],
         ]
         # các hàm tìm kiếm nước đi của các quân
+        # sẽ ánh xạ các kí tự tương ứng với tên  quân cờ và hàm di chuyển
         self.moveFunction = {'p': self.getPawnMoves, 
                              'R':self.getRookMoves, 
                              'N':self.getKnightMoves, 
@@ -145,7 +147,7 @@ class GameState():
                     self.current_Castling_Rights.bK_Side = False
     
 
-    def getValidMoves(self):
+    def getValidMoves(self): # các nước đi hợp lệ
         # lưu quyền castling tạm thời
         tempCastleRights = CastleRights(self.current_Castling_Rights.wK_Side, self.current_Castling_Rights.bK_Side, 
                                         self.current_Castling_Rights.wQ_Side, self.current_Castling_Rights.bQ_Side)
@@ -174,8 +176,8 @@ class GameState():
                     for i in range(1, 8):
                         # từ vua ta tìm ra các hướng của Quân đich đang chiếu vua
                         # để cứu vua ta phải di chuyển quân chặn các ô này
-                        #checkinfo[1] và [2]: là hướng của quân địch tới ăn vua 
-                        #vd bishop black ăn vua theo hướng trái lên :(-1,-1)
+                        #checkinfo[2] và [3]: là hướng của quân địch tới ăn vua 
+                          #vd bishop black ăn vua theo hướng trái lên :(-1,-1)
                         validSquare = (kingRow + checkInfo[2] * i, kingCol + checkInfo[3] * i)
                         valid_Squares.append(validSquare)
                         if validSquare[0] == checkRow and validSquare[1] == checkCol:
@@ -209,23 +211,24 @@ class GameState():
 
 
 
-    def inCheck(self): # Kiểm tra chiếu
+    def inCheck(self): # Kiểm tra vua có bị tấn công không
         if self.whiteToMove:
             return self.squareUnderAttack(self.whiteKingLocation[0], self.whiteKingLocation[1])  # ktra tra quân Vua trắng
         else:
             return self.squareUnderAttack(self.blackKingLocation[0], self.blackKingLocation[1])  # ktra tra quân Vua đen
 
-    def squareUnderAttack(self,r,c):
+    def squareUnderAttack(self,r,c): # kiểm tra 1 quân cờ có bị tấn công không
         self.whiteToMove = not self.whiteToMove
         oppMoves =self.getAllPossibleMoves()
         self.whiteToMove = not self.whiteToMove
         # Kiểm tra xem ô (r, c) có nằm trong nước đi của quân đối phương không
         for move in oppMoves:
+            # end_pos=> (endRow,endCol) là vị trí mà 1 quân cờ có thể đi tới
             if move.endRow == r and move.endCol == c:
                 return True  # Ô bị tấn công
         return False  # Ô không bị tấn công
     
-    def getAllPossibleMoves(self):
+    def getAllPossibleMoves(self): #  1 list move , mỗi ptu là 1 obj move (start_pos,end_pos,board): các nước đi tương ứng vs các quân cờ
         moves = []
         for r in range(len(self.board)):
             for c in range(len(self.board[r])):
@@ -235,7 +238,7 @@ class GameState():
                     self.moveFunction[piece](r,c,moves)
         return moves
     
-    def checkForPinsAndChecks(self):
+    def checkForPinsAndChecks(self): # kiểm tra xem vua có bị chiếu không,danh sách quân bị ghìm, danh sách quân dịch ăn vua
         pins = []  # Quân cờ bị khóa
         checks = []  # Quân đang chiếu
         in_check = False       
@@ -507,7 +510,8 @@ class Move():
         self.startCol = startSq[1] 
         self.endRow = endSq[0] #vị trí kết thúc
         self.endCol = endSq[1]
-        self.pieceMoved = board[self.startRow][self.startCol] #quân cờ di chuyển
+        #trong class GameSate có 1 list move , mỗi ptu trong list này là 1 obj move gồm (pos_start,pos_end)
+        self.pieceMoved = board[self.startRow][self.startCol] # start_end được dùng để đối chiếu lên  bàn cờ xem đây là quân cờ nào
         self.pieceCaptured = board[self.endRow][self.endCol] #ô cờ mà quân cò di chuyển đến
         self.isPawnPromotion = (self.pieceMoved == "wp" and self.endRow == 0) or (self.pieceMoved == "bp" and self.endRow == 7)
         #Enpassant bat tot qua duong

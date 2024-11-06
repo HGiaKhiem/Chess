@@ -1,5 +1,6 @@
 import pygame as p
 import ChessEngine 
+import random
 #thông tin về bàn cờ
 WIDTH = HEIGHT = 512 # kích thước 
 DIMENSION = 8 # số ô cờ
