@@ -3,6 +3,7 @@ import ChessEngine
 import random
 <<<<<<< HEAD
 #thông tin về bàn cờ
+#test git
 WIDTH = HEIGHT = 512 # kích thước 
 DIMENSION = 8 # số ô cờ
 SQ_SIZE = HEIGHT // DIMENSION # kích thước các ô cờ

@@ -1,6 +1,5 @@
 <<<<<<< HEAD
 #test git hub
-#test git hub 2 test them phat nua 
 #class   cho game 
 =======
 >>>>>>> 595b1e9b0c537e24d442e53e99c8b383bbf65f10
@@ -17,6 +16,8 @@ class GameState():
             ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"],
         ]
 <<<<<<< HEAD
+        #TEST them phat nữa
+        #jfaiofjiof
         # các hàm tìm kiếm nước đi của các quân
         # sẽ ánh xạ các kí tự tương ứng với tên  quân cờ và hàm di chuyển
         self.moveFunction = {'p': self.getPawnMoves, 
