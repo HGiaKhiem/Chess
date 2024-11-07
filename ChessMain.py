@@ -207,7 +207,7 @@ def start_pvai():
         clock.tick(MAX_FPS)
         p.display.flip()
 
-def findBestMove(gs, validMoves):
+def findBestMove(gs, validMoves): # bắt đầu viết ai cho nay
     if validMoves:
         return random.choice(validMoves)
     return None
