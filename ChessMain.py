@@ -124,6 +124,8 @@ def start_pvp():
         p.display.flip()  # Cập nhật màn hình
 
 
+#faehf;aefhhdsfh
+
 def start_pvai():
     screen = p.display.set_mode((WIDTH, HEIGHT))
     clock = p.time.Clock()
@@ -212,6 +214,185 @@ def findBestMove(gs, validMoves): # bắt đầu viết ai cho nay
         return random.choice(validMoves)
     return None
 
+def minimax(gs, depth, maxPlayer, alpha, beta): # thuật toán minimax cắt tỉa alpha beta
+    validMoves = gs.getValidMoves()  # Lấy tất cả các nước đi hợp lệ
+    if depth == 0 or gs.checkMate or gs.staleMate:
+        return scoreBoard(gs)  # Trả về điểm của bảng cờ tại vị trí này
+
+    if maxPlayer:  # Maximizing player (AI)
+        maxEval = float('-inf')
+        for move in validMoves:
+            gs.makeMove(move)  # Thực hiện nước đi
+            eval = minimax(gs, depth - 1, False, alpha, beta)  # Đệ quy cho minimizing player
+            gs.undoMove()  # Hoàn tác nước đi
+            maxEval = max(maxEval, eval)
+            alpha = max(alpha, eval)
+            if beta <= alpha:  # Cắt tỉa nếu không cần phải xét tiếp nhánh này
+                break
+        return maxEval
+    else:  # Minimizing player (Đối thủ)
+        minEval = float('inf')
+        for move in validMoves:
+            gs.makeMove(move)  # Thực hiện nước đi
+            eval = minimax(gs, depth - 1, True, alpha, beta)  # Đệ quy cho maximizing player
+            gs.undoMove()  # Hoàn tác nước đi
+            minEval = min(minEval, eval)
+            beta = min(beta, eval)
+            if beta <= alpha:  # Cắt tỉa nếu không cần phải xét tiếp nhánh này
+                break
+        return minEval
+def scoreBoard(gs): # hảm đánh giá để áp dụng minimax
+    # các đánh giá hiện có: 
+    # Tiêu chí 1: Dựa vào số quân theo màu đang có trên board (done)
+    #  lượt của max thì ứng với mỗi quân trăng sẽ + điểm và - điểm khi có quân đen: score của max sẽ có xu hướng lớn và dương
+    # lượt của min thì ngược lại : score của min có xu hướng thấp và có thể âm
+    # Tiêu chí 2: Mỗi quân cờ khi ở các vị trí thuận lợi sẽ được cộng thêm điểm (chưa)
+    # Tiêu chí 3:Kiểm soát vị trí trung tâm (done)
+    center_positions = {(3, 3), (3, 4), (4, 3), (4, 4)}
+    # Tiêu chí 4: Tính Linh Hoạt và Số Lượng Nước Đi Hợp Lệ (chưa)
+    # Tiêu chí 5 : Bảo Vệ và Tấn Công (chưa)
+    # Tiêu chí 6 :Cấu Trúc Tốt (Quân Tốt và Chuỗi Tốt) (chưa)
+    # Tiêu chí 7 :Sự An Toàn của Vua (chưa)
+    # Tiêu chí 8 : Vị Trí của Quân Xe và Hậu Khả Năng Tấn Công vào Vùng của Đối Thủ (chưa)
+    # Tiêu chí 9 : Khả Năng Tấn Công vào Vùng của Đối Thủ (chưa)
+    score = 0
+    for row in len (gs.board):
+        for col in len (gs.board[row]):
+            square=gs.board[row][col]
+            if square != '--':  # Nếu không phải ô trống
+                piece_val = pieceValue(square)  # Giá trị quân cờ
+                piece_color = square[0]  # Màu của quân cờ (Trắng = 'w', Đen = 'b')
+
+                if piece_color == 'w':  # Nếu quân là quân trắng (maxPlayer)
+                    score += piece_val
+                elif piece_color == 'b':  # Nếu quân là quân đen (minPlayer)
+                    score -= piece_val
+
+                #  Tiêu chí 2: Đánh giá vị trí của quân cờ nếu ở 1 vị trí có lợi
+                if square[1] == 'N':  # Nếu là quân Mã
+                    score += knightPositionValue(square, gs)
+                elif square[1] == 'R':  # Nếu là quân Xe
+                    score += rookPositionValue(square, gs)
+                elif square[1] == 'Q':  # Nếu là quân Hậu
+                    score += queenPositionValue(square, gs)
+                elif square[1] == 'P':  # Tốt
+                    score += pawnPositionValue(square, gs)
+                elif square[1] == 'K':  # Vua
+                    score += kingPositionValue(square, gs)
+
+                # Tiêu chí 3: Đánh giá vị trí trung tâm
+                piece_pos=(row,col)
+                if piece_pos in center_positions:
+                    if piece_color == 'w': # Quân trắng ở trung tâm
+                       score += 0.5
+                else:  # Quân đen ở trung tâm
+                    score -= 0.5
+
+
+                
+
+                # Có thể thêm các yếu tố chiến lược khác vào
+
+    return score
+
+def knightPositionValue(piece, gs):
+    # Đánh giá vị trí quân Mã trên bàn cờ (đánh giá cao cho Mã ở trung tâm)
+    knight_positions = {
+        (3, 3): 3, (3, 4): 3, (4, 3): 3, (4, 4): 3,  # Trung tâm
+        # Có thể thêm các vị trí khác
+    }
+    return knight_positions.get(piece[0], 0)
+
+def rookPositionValue(piece, gs):
+    # Đánh giá vị trí quân Xe (Ví dụ, Xe mạnh khi kiểm soát các đường thẳng)
+    rook_positions = {
+        (0, 0): 5, (0, 7): 5, (7, 0): 5, (7, 7): 5,  # Các góc quan trọng
+        # Các đường thẳng khác
+    }
+    return rook_positions.get(piece[0], 0)
+
+def queenPositionValue(piece, gs):
+    # Đánh giá vị trí quân Hậu, quân Hậu mạnh khi kiểm soát cả các hàng, cột và đường chéo
+    queen_positions = {
+        (3, 3): 10, (3, 4): 10, (4, 3): 10, (4, 4): 10,  # Trung tâm
+        # Có thể thêm các vị trí khác
+    }
+    return queen_positions.get(piece[0], 0)
+
+def pawnPositionValue(piece, position):
+    row, col = position
+
+    # Bảng điểm cho quân Tốt theo vị trí trên bàn cờ.
+    # Giá trị ở các hàng cao hơn khuyến khích quân Tốt tiến về phía đối thủ.
+    pawn_position_scores = [
+        [0, 0, 0, 0, 0, 0, 0, 0],         # Hàng 0
+        [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],  # Hàng 1
+        [0.5, 1, 1, 1, 1, 1, 1, 0.5],       # Hàng 2
+        [0.5, 1, 2, 2, 2, 2, 1, 0.5],       # Hàng 3
+        [0.5, 1, 2, 2, 2, 2, 1, 0.5],       # Hàng 4
+        [0.5, 1, 1, 1, 1, 1, 1, 0.5],       # Hàng 5
+        [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],  # Hàng 6
+        [0, 0, 0, 0, 0, 0, 0, 0]            # Hàng 7
+    ]
+
+    # mục đích là white gần row 0 thì có điểm cao, black thì gần row 7 có giá trị cao
+    # nhưng vì black đi từ trên xuống nên ta cần 
+    # Nếu là quân Tốt đen:
+    # ví trị black đang ở row 5 thì sẽ là [7-5][col]=[2][cpl] 
+    # tốt trăng thì dùng index của pawn_position_scores
+    return pawn_position_scores[row][col] if piece[0] == 'w' else pawn_position_scores[7-row][col]
+
+def kingPositionValue(piece, position, endgame=False): # chưa hoàn thiện xong, biến endgame này chưa được định nghĩa
+    row, col = position
+    # Đánh giá vị trí của Vua ở giai đoạn mở đầu
+    opening_position_scores = [
+        [2, 2, 1, 0, 0, 1, 2, 2],  # Hàng 0
+        [2, 2, 1, 0, 0, 1, 2, 2],  # Hàng 1
+        [1, 1, 0, 0, 0, 0, 1, 1],  # Hàng 2
+        [0, 0, 0, 0, 0, 0, 0, 0],  # Hàng 3
+        [0, 0, 0, 0, 0, 0, 0, 0],  # Hàng 4
+        [1, 1, 0, 0, 0, 0, 1, 1],  # Hàng 5
+        [2, 2, 1, 0, 0, 1, 2, 2],  # Hàng 6
+        [2, 3, 1, 0, 0, 1, 3, 2]   # Hàng 7
+    ]
+    # Đánh giá vị trí của Vua ở tàn cuộc
+    endgame_position_scores = [
+        [0, 0, 1, 2, 2, 1, 0, 0],  # Hàng 0
+        [0, 1, 2, 3, 3, 2, 1, 0],  # Hàng 1
+        [1, 2, 3, 4, 4, 3, 2, 1],  # Hàng 2
+        [2, 3, 4, 5, 5, 4, 3, 2],  # Hàng 3
+        [2, 3, 4, 5, 5, 4, 3, 2],  # Hàng 4
+        [1, 2, 3, 4, 4, 3, 2, 1],  # Hàng 5
+        [0, 1, 2, 3, 3, 2, 1, 0],  # Hàng 6
+        [0, 0, 1, 2, 2, 1, 0, 0]   # Hàng 7
+    ]
+    if endgame:
+        return endgame_position_scores[row][col]
+    else:
+        return opening_position_scores[row][col]
+
+
+def pieceValue(piece): # Đánh giá giá trị quân cờ, ví dụ: quân tốt = 1, quân mã = 3, quân xe = 5, v.v.
+    pieceValues = {'P': 1, 'N': 3, 'B': 3, 'R': 5, 'Q': 9, 'K': 1000}
+     # Dùng chữ cái thứ 2 trong chuỗi như 'P', 'N', 'R', v.v. 
+     #nếu k có quân cờ trả về giá trị 0
+    return pieceValues.get(piece[1], 0) 
+
+def aiMove(gs): # hàm IA di chuyển chưa chỉnh sửa
+    validMoves = gs.getValidMoves()
+    bestMove = None
+    bestScore = float('-inf')
+
+    for move in validMoves:
+        gs.makeMove(move)
+        boardScore = minimax(gs, 3, False, float('-inf'), float('inf'))  # Sử dụng độ sâu 3 để tìm kiếm nước đi
+        gs.undoMove()
+
+        if boardScore > bestScore:
+            bestScore = boardScore
+            bestMove = move
+
+    return bestMove
 
 
 
