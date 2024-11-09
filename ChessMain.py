@@ -378,7 +378,7 @@ def pieceValue(piece): # Đánh giá giá trị quân cờ, ví dụ: quân tố
      #nếu k có quân cờ trả về giá trị 0
     return pieceValues.get(piece[1], 0) 
 
-def aiMove(gs): # hàm IA di chuyển chưa chỉnh sửa
+def aiMove(gs): # hàm ai di chuyển chưa chỉnh sửa
     validMoves = gs.getValidMoves()
     bestMove = None
     bestScore = float('-inf')
