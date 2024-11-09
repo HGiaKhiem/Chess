@@ -394,8 +394,7 @@ def aiMove(gs): # hàm IA di chuyển chưa chỉnh sửa
 
     return bestMove
 
-
-
+#hehhe
 def highlightMoves(screen, gs, validMoves, sqSelected): # tô màu các ô di chuyển
     # nếu đã chọn 1 ô
     if sqSelected != ():
