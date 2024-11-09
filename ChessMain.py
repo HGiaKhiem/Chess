@@ -124,6 +124,8 @@ def start_pvp():
         p.display.flip()  # Cập nhật màn hình
 
 
+#faehf;aefhhdsfh
+
 def start_pvai():
     screen = p.display.set_mode((WIDTH, HEIGHT))
     clock = p.time.Clock()
