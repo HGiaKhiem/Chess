@@ -246,15 +246,11 @@ def scoreBoard(gs): # hảm đánh giá để áp dụng minimax
     # Tiêu chí 1: Dựa vào số quân theo màu đang có trên board (done)
     #  lượt của max thì ứng với mỗi quân trăng sẽ + điểm và - điểm khi có quân đen: score của max sẽ có xu hướng lớn và dương
     # lượt của min thì ngược lại : score của min có xu hướng thấp và có thể âm
-    # Tiêu chí 2: Mỗi quân cờ khi ở các vị trí thuận lợi sẽ được cộng thêm điểm (chưa)
+    # Tiêu chí 2: Mỗi quân cờ khi ở các vị trí thuận lợi sẽ được cộng thêm điểm (done)
     # Tiêu chí 3:Kiểm soát vị trí trung tâm (done)
     center_positions = {(3, 3), (3, 4), (4, 3), (4, 4)}
-    # Tiêu chí 4: Tính Linh Hoạt và Số Lượng Nước Đi Hợp Lệ (chưa)
-    # Tiêu chí 5 : Bảo Vệ và Tấn Công (chưa)
-    # Tiêu chí 6 :Cấu Trúc Tốt (Quân Tốt và Chuỗi Tốt) (chưa)
-    # Tiêu chí 7 :Sự An Toàn của Vua (chưa)
-    # Tiêu chí 8 : Vị Trí của Quân Xe và Hậu Khả Năng Tấn Công vào Vùng của Đối Thủ (chưa)
-    # Tiêu chí 9 : Khả Năng Tấn Công vào Vùng của Đối Thủ (chưa)
+    # Tiêu chí 4: Tính Linh Hoạt và Số Lượng Nước Đi Hợp Lệ (done)
+    # Tiêu chí 5 :Sự An Toàn của Vua (done)
     score = 0
     for row in len (gs.board):
         for col in len (gs.board[row]):
@@ -263,61 +259,95 @@ def scoreBoard(gs): # hảm đánh giá để áp dụng minimax
                 piece_val = pieceValue(square)  # Giá trị quân cờ
                 piece_color = square[0]  # Màu của quân cờ (Trắng = 'w', Đen = 'b')
 
+                #Tiêu chí 1: Dựa vào số quân theo màu đang có trên board
                 if piece_color == 'w':  # Nếu quân là quân trắng (maxPlayer)
                     score += piece_val
                 elif piece_color == 'b':  # Nếu quân là quân đen (minPlayer)
                     score -= piece_val
 
+                position=(row,col)
+
                 #  Tiêu chí 2: Đánh giá vị trí của quân cờ nếu ở 1 vị trí có lợi
                 if square[1] == 'N':  # Nếu là quân Mã
-                    score += knightPositionValue(square, gs)
+                    score += knightPositionValue(position, piece_color)
                 elif square[1] == 'R':  # Nếu là quân Xe
-                    score += rookPositionValue(square, gs)
+                    score += rookPositionValue(position, piece_color)
                 elif square[1] == 'Q':  # Nếu là quân Hậu
-                    score += queenPositionValue(square, gs)
+                    score += queenPositionValue(position, piece_color)
                 elif square[1] == 'P':  # Tốt
-                    score += pawnPositionValue(square, gs)
+                    score += pawnPositionValue(position, piece_color)
                 elif square[1] == 'K':  # Vua
-                    score += kingPositionValue(square, gs)
+                    score += kingPositionValue(position, piece_color,gs)
 
                 # Tiêu chí 3: Đánh giá vị trí trung tâm
-                piece_pos=(row,col)
-                if piece_pos in center_positions:
+                if position in center_positions:
                     if piece_color == 'w': # Quân trắng ở trung tâm
-                       score += 0.5
+                       score += 1
                 else:  # Quân đen ở trung tâm
-                    score -= 0.5
+                    score -= 1
 
+                # Tiêu chí 4: Tính linh hoạt và số lượng nước đi hợp lệ
+                # Lấy tất cả các nước đi hợp lệ cho quân cờ
+                valid_moves = gs.getValidMoves()  # Sử dụng getValidMoves để lấy các nước đi hợp lệ
+                score += len(valid_moves) * 0.1  # Thêm vào điểm dựa trên số lượng nước đi hợp lệ
 
+                # Tiêu chí 5: Sự an toàn của vua
+                if square[1] == 'K':  # Nếu là quân Vua
+                    # Kiểm tra xem quân vua có bị chiếu không
+                    if gs.inCheck():  # Nếu vua bị chiếu
+                        score -= 5  # Giảm điểm nếu vua bị chiếu
                 
-
-                # Có thể thêm các yếu tố chiến lược khác vào
 
     return score
 
-def knightPositionValue(piece, gs):
+def knightPositionValue(position, piece_color):
     # Đánh giá vị trí quân Mã trên bàn cờ (đánh giá cao cho Mã ở trung tâm)
-    knight_positions = {
-        (3, 3): 3, (3, 4): 3, (4, 3): 3, (4, 4): 3,  # Trung tâm
-        # Có thể thêm các vị trí khác
-    }
-    return knight_positions.get(piece[0], 0)
+    # quân trắng đi theo hướng 0-7 còn đen thì 7-0  tức là 2 loại đối xứng vị trí với nhau
+    # thay vì ta phải làm 2 bảng điểm cho 2 loại quân thì ta chỉ cần 1 bảng theo hướng 0-7 
+    #sau đó, với quân trắng ta dùng vị trí trực tiếp còn quân  đen thì sẽ là 7-row
+    knight_positions = [
+    [-5, -4, -2, -2, -2, -2, -4, -5],  # Hàng 0
+    [-4, -2, 0, 0, 0, 0, -2, -4],  # Hàng 1
+    [-2, 0, 2, 4, 4, 2, 0, -2],  # Hàng 2
+    [-2, 0, 4, 6, 6, 4, 0, -2],  # Hàng 3
+    [-2, 0, 4, 6, 6, 4, 0, -2],  # Hàng 4
+    [-2, 0, 2, 4, 4, 2, 0, -2],  # Hàng 5
+    [-4, -2, 0, 0, 0, 0, -2, -4],  # Hàng 6
+    [-5, -4, -2, -2, -2, -2, -4, -5],  # Hàng 7
+    ]
 
-def rookPositionValue(piece, gs):
-    # Đánh giá vị trí quân Xe (Ví dụ, Xe mạnh khi kiểm soát các đường thẳng)
-    rook_positions = {
-        (0, 0): 5, (0, 7): 5, (7, 0): 5, (7, 7): 5,  # Các góc quan trọng
-        # Các đường thẳng khác
-    }
-    return rook_positions.get(piece[0], 0)
+    row, col = position
+    return knight_positions[row][col] if piece_color == 'w' else knight_positions[7 - row][col]
 
-def queenPositionValue(piece, gs):
-    # Đánh giá vị trí quân Hậu, quân Hậu mạnh khi kiểm soát cả các hàng, cột và đường chéo
-    queen_positions = {
-        (3, 3): 10, (3, 4): 10, (4, 3): 10, (4, 4): 10,  # Trung tâm
-        # Có thể thêm các vị trí khác
-    }
-    return queen_positions.get(piece[0], 0)
+def rookPositionValue(position, piece_color):
+    # Bảng điểm cho quân Xe (ưu tiên di chuyển trên các cột mở hoặc góc bàn cờ)
+    rook_positions = [
+        [0, 0, 0, 0, 0, 0, 0, 0],  # Hàng 0
+        [0.5, 1, 1, 1, 1, 1, 1, 0.5],  # Hàng 1
+        [-0.5, 0, 0, 0, 0, 0, 0, -0.5],  # Hàng 2
+        [-0.5, 0, 0, 0, 0, 0, 0, -0.5],  # Hàng 3
+        [-0.5, 0, 0, 0, 0, 0, 0, -0.5],  # Hàng 4
+        [-0.5, 0, 0, 0, 0, 0, 0, -0.5],  # Hàng 5
+        [-0.5, 0, 0, 0, 0, 0, 0, -0.5],  # Hàng 6
+        [0, 0, 0, 0.5, 0.5, 0, 0, 0],  # Hàng 7
+    ]
+    row, col = position
+    return rook_positions[row][col] if piece_color == 'w' else rook_positions[7 - row][col]
+
+def queenPositionValue(position, piece_color):
+    # Bảng điểm cho quân Hậu (ưu tiên trung tâm bàn cờ)
+    queen_positions = [
+        [-2, -1, -1, -0.5, -0.5, -1, -1, -2],  # Hàng 0
+        [-1, 0, 0, 0, 0, 0, 0, -1],  # Hàng 1
+        [-1, 0, 0.5, 0.5, 0.5, 0.5, 0, -1],  # Hàng 2
+        [-0.5, 0, 0.5, 0.5, 0.5, 0.5, 0, -0.5],  # Hàng 3
+        [-0.5, 0, 0.5, 0.5, 0.5, 0.5, 0, -0.5],  # Hàng 4
+        [-1, 0, 0.5, 0.5, 0.5, 0.5, 0, -1],  # Hàng 5
+        [-1, 0, 0, 0, 0, 0, 0, -1],  # Hàng 6
+        [-2, -1, -1, -0.5, -0.5, -1, -1, -2],  # Hàng 7
+    ]
+    row, col = position
+    return queen_positions[row][col] if piece_color == 'w' else queen_positions[7 - row][col]
 
 def pawnPositionValue(piece, position):
     row, col = position
@@ -334,49 +364,43 @@ def pawnPositionValue(piece, position):
         [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],  # Hàng 6
         [0, 0, 0, 0, 0, 0, 0, 0]            # Hàng 7
     ]
-
-    # mục đích là white gần row 0 thì có điểm cao, black thì gần row 7 có giá trị cao
-    # nhưng vì black đi từ trên xuống nên ta cần 
-    # Nếu là quân Tốt đen:
-    # ví trị black đang ở row 5 thì sẽ là [7-5][col]=[2][cpl] 
-    # tốt trăng thì dùng index của pawn_position_scores
     return pawn_position_scores[row][col] if piece[0] == 'w' else pawn_position_scores[7-row][col]
 
-def kingPositionValue(piece, position, endgame=False): # chưa hoàn thiện xong, biến endgame này chưa được định nghĩa
+def kingPositionValue(position, piece_color, gs):
+    # Bảng điểm cho Vua ở giai đoạn mở đầu
+    opening_king_positions = [
+        [-3, -4, -4, -5, -5, -4, -4, -3],  # Hàng 0
+        [-3, -4, -4, -5, -5, -4, -4, -3],  # Hàng 1
+        [-3, -4, -4, -5, -5, -4, -4, -3],  # Hàng 2
+        [-3, -4, -4, -5, -5, -4, -4, -3],  # Hàng 3
+        [-2, -3, -3, -4, -4, -3, -3, -2],  # Hàng 4
+        [-1, -2, -2, -2, -2, -2, -2, -1],  # Hàng 5
+        [2, 2, 0, 0, 0, 0, 2, 2],  # Hàng 6
+        [2, 3, 1, 0, 0, 1, 3, 2],  # Hàng 7
+    ]
+    # Bảng điểm cho Vua ở tàn cuộc
+    endgame_king_positions = [
+        [-5, -4, -3, -2, -2, -3, -4, -5],  # Hàng 0
+        [-3, -2, -1, 0, 0, -1, -2, -3],  # Hàng 1
+        [-3, -1, 2, 3, 3, 2, -1, -3],  # Hàng 2
+        [-3, -1, 3, 4, 4, 3, -1, -3],  # Hàng 3
+        [-3, -1, 3, 4, 4, 3, -1, -3],  # Hàng 4
+        [-3, -1, 2, 3, 3, 2, -1, -3],  # Hàng 5
+        [-3, -3, 0, 0, 0, 0, -3, -3],  # Hàng 6
+        [-5, -3, -3, -3, -3, -3, -3, -5],  # Hàng 7
+    ]
     row, col = position
-    # Đánh giá vị trí của Vua ở giai đoạn mở đầu
-    opening_position_scores = [
-        [2, 2, 1, 0, 0, 1, 2, 2],  # Hàng 0
-        [2, 2, 1, 0, 0, 1, 2, 2],  # Hàng 1
-        [1, 1, 0, 0, 0, 0, 1, 1],  # Hàng 2
-        [0, 0, 0, 0, 0, 0, 0, 0],  # Hàng 3
-        [0, 0, 0, 0, 0, 0, 0, 0],  # Hàng 4
-        [1, 1, 0, 0, 0, 0, 1, 1],  # Hàng 5
-        [2, 2, 1, 0, 0, 1, 2, 2],  # Hàng 6
-        [2, 3, 1, 0, 0, 1, 3, 2]   # Hàng 7
-    ]
-    # Đánh giá vị trí của Vua ở tàn cuộc
-    endgame_position_scores = [
-        [0, 0, 1, 2, 2, 1, 0, 0],  # Hàng 0
-        [0, 1, 2, 3, 3, 2, 1, 0],  # Hàng 1
-        [1, 2, 3, 4, 4, 3, 2, 1],  # Hàng 2
-        [2, 3, 4, 5, 5, 4, 3, 2],  # Hàng 3
-        [2, 3, 4, 5, 5, 4, 3, 2],  # Hàng 4
-        [1, 2, 3, 4, 4, 3, 2, 1],  # Hàng 5
-        [0, 1, 2, 3, 3, 2, 1, 0],  # Hàng 6
-        [0, 0, 1, 2, 2, 1, 0, 0]   # Hàng 7
-    ]
-    if endgame:
-        return endgame_position_scores[row][col]
-    else:
-        return opening_position_scores[row][col]
-
+    positions = endgame_king_positions if gs.checkMate else opening_king_positions
+    return positions[row][col] if piece_color == 'w' else positions[7 - row][col]
 
 def pieceValue(piece): # Đánh giá giá trị quân cờ, ví dụ: quân tốt = 1, quân mã = 3, quân xe = 5, v.v.
-    pieceValues = {'P': 1, 'N': 3, 'B': 3, 'R': 5, 'Q': 9, 'K': 1000}
+    pieceValues = {'P': 1, 'N': 3, 'B': 3, 'R': 5, 'Q': 9, 'K': 10}
      # Dùng chữ cái thứ 2 trong chuỗi như 'P', 'N', 'R', v.v. 
      #nếu k có quân cờ trả về giá trị 0
     return pieceValues.get(piece[1], 0) 
+
+
+
 
 def aiMove(gs): # hàm ai di chuyển chưa chỉnh sửa
     validMoves = gs.getValidMoves()
@@ -393,7 +417,6 @@ def aiMove(gs): # hàm ai di chuyển chưa chỉnh sửa
             bestMove = move
 
     return bestMove
-
 
 def highlightMoves(screen, gs, validMoves, sqSelected): # tô màu các ô di chuyển
     # nếu đã chọn 1 ô
@@ -417,8 +440,6 @@ def highlightMoves(screen, gs, validMoves, sqSelected): # tô màu các ô di ch
                         s.fill(p.Color('lightgreen')) 
                     screen.blit(s, (move.endCol * SQ_SIZE, move.endRow * SQ_SIZE))
 
-
-
 def drawGameState(screen, gs, validMoves, sqSelected): # thực hiện vẽ
     drawBoard(screen)  
     drawPieces(screen, gs.board)
@@ -439,7 +460,6 @@ def drawPieces(screen, board): # vẽ các quân cờ lên bàn cờ
             if piece != "--":  # Nếu ô không trống
                 screen.blit(IMAGES[piece], p.Rect(c * SQ_SIZE, r * SQ_SIZE, SQ_SIZE, SQ_SIZE))
  
-
 def animateMove(move, screen, board , clock): # hiệu ứng chuyển động  khi di chuyển 1 quân cờ
     global colors
     # tinh toan khoang cach 
@@ -463,14 +483,12 @@ def animateMove(move, screen, board , clock): # hiệu ứng chuyển động  k
         p.display.flip()
         clock.tick(60)
 
-
 def drawEndGameText (screen, text): # in ra thông báo kết thúc
     font = p.font.SysFont("Arial", 32, True, False)
     textObject =font.render(text, 0, p.Color("Black"))
     textLocation = p .Rect(0,0, WIDTH, HEIGHT).move(WIDTH/2 - textObject.get_width()/2,
                                                     HEIGHT/2 - textObject.get_height()/2)
     screen.blit(textObject,textLocation)
-
 
 def choosePromotionPiece(screen, color): # lựa chọn các quân khi phong tốt 
     promotionPieces = ['Q', 'R', 'B', 'N']  
