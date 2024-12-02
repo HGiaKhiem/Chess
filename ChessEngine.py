@@ -12,6 +12,7 @@ class GameState():
             ["wp", "wp", "wp", "wp", "wp", "wp", "wp", "wp"],
             ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"],
         ]
+
        
         # các hàm tìm kiếm nước đi của các quân
         # sẽ ánh xạ các kí tự tương ứng với tên  quân cờ và hàm di chuyển
@@ -71,7 +72,7 @@ class GameState():
             if move.endCol - move.startCol  == 2:
                 self.board[move.endRow][move.endCol - 1] = self.board[move.endRow][move.endCol + 1] #di chuyen quan xe 
                 self.board[move.endRow][move.endCol + 1] = '--'
-            if move.startCol - move.endCol  == 3:
+            else:
                 self.board[move.endRow][move.endCol + 1] = self.board[move.endRow][move.endCol - 2]
                 self.board[move.endRow][move.endCol - 2] = '--'
 
@@ -107,11 +108,11 @@ class GameState():
 
             if move.isCastleMove:
                 if move.endCol - move.startCol == 2:
-                    self.board[move.endRow][move.endCol - 1] = self.board[move.endRow][move.endCol + 1]
-                    self.board[move.endRow][move.endcol + 1]='--'
+                    self.board[move.endRow][move.endCol + 1] = self.board[move.endRow][move.endCol - 1]
+                    self.board[move.endRow][move.endCol - 1]= '--'
                 else:
-                    self.board[move.endRow][move.endCol +1] = self.board[move.endRow][move.endCol - 2]
-                    self.board[move.endRow][move.endCol -2] = '--'
+                    self.board[move.endRow][move.endCol - 2] = self.board[move.endRow][move.endCol + 1]
+                    self.board[move.endRow][move.endCol + 1] = '--'
 
 
     def updateCastleRights(self, move):
@@ -456,7 +457,7 @@ class GameState():
 
     def getKingMoves(self, r, c, moves):
         rowMoves = (-1, -1, -1,  0,  0,  1,  1, 1) 
-        colMoves = ( 1,  0,  1, -1,  1, -1 , 0, 1)    
+        colMoves = ( -1,  0,  1, -1,  1, -1 , 0, 1)    
         allyColor = 'w' if self.whiteToMove else 'b'  # Xác định màu quân đồng đội
         for i in range(8):
             endRow = r + rowMoves[i]
