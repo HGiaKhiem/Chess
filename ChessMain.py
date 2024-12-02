@@ -16,9 +16,9 @@ def loadImages():
 def main_menu():
     p.init()
     screen = p.display.set_mode((WIDTH, HEIGHT)) # tạo kích thước cửa sổ 
-    p.display.set_caption("Chess Game - Choose Mode") # tiêu đề
+    p.display.set_caption("Chess Game ") # tiêu đề
     font = p.font.SysFont("Arial", 32)
-    clock = p.time.Clock() # khởi tạo  clock để điều khiể fps
+    clock = p.time.Clock() # khởi tạo  clock để điều khiển fps
 
     while True:
         screen.fill(p.Color("white")) # làm sạch màn hình = màu trắng 
@@ -241,6 +241,7 @@ def minimax(gs, depth, maxPlayer, alpha, beta): # thuật toán minimax cắt t�
             if beta <= alpha:  # Cắt tỉa nếu không cần phải xét tiếp nhánh này
                 break
         return minEval
+    
 def scoreBoard(gs): # hảm đánh giá để áp dụng minimax
     # các đánh giá hiện có: 
     # Tiêu chí 1: Dựa vào số quân theo màu đang có trên board (done)
